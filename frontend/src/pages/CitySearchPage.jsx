@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
   Filter, 
@@ -26,7 +27,12 @@ import {
   Plane,
   Hotel,
   Camera,
-  Mountain
+  Mountain,
+  Calendar,
+  Info,
+  CheckCircle,
+  X,
+  Navigation
 } from 'lucide-react';
 
 const CitySearchPage = () => {
@@ -34,9 +40,11 @@ const CitySearchPage = () => {
   const [searchQuery, setSearchQuery] = useState('Paragliding');
   const [activeGroup, setActiveGroup] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
+  const [selectedResult, setSelectedResult] = useState(null);
+  const [wishlist, setWishlist] = useState([]);
 
-  // Sample activity/search results data
-  const searchResults = [
+  // Working image URLs from Unsplash
+  const sampleResults = [
     {
       id: 1,
       title: 'Butterfly Paragliding Adventure',
@@ -46,8 +54,8 @@ const CitySearchPage = () => {
       price: 149,
       duration: '2 hours',
       location: 'Interlaken, Switzerland',
-      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=500&fit=crop',
-      description: 'Experience the thrill of paragliding over the stunning Swiss Alps with certified instructors.',
+      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop',
+      description: 'Experience the thrill of paragliding over the stunning Swiss Alps with certified instructors. Feel the wind beneath your wings as you soar above breathtaking landscapes.',
       highlights: ['Professional instructor', 'All equipment included', 'Photos & videos', 'Insurance covered'],
       provider: 'Butterfly Adventures',
       contact: '+41 78 123 4567',
@@ -66,8 +74,8 @@ const CitySearchPage = () => {
       price: 179,
       duration: '2.5 hours',
       location: 'Grindelwald, Switzerland',
-      image: 'https://images.unsplash.com/photo-1522165078649-823cf4dbaf46?w=800&h=500&fit=crop',
-      description: 'Soar like an eagle above the breathtaking landscapes of Grindelwald and the Jungfrau region.',
+      image: 'https://images.unsplash.com/photo-1522165078649-823cf4dbaf46?w=600&h=400&fit=crop',
+      description: 'Soar like an eagle above the breathtaking landscapes of Grindelwald and the Jungfrau region. Experience the ultimate mountain adventure.',
       highlights: ['Mountain views', 'Professional photos', 'Video recording', 'Hotel pickup'],
       provider: 'Careful Rook Adventures',
       contact: '+41 78 987 6543',
@@ -86,8 +94,8 @@ const CitySearchPage = () => {
       price: 199,
       duration: '3 hours',
       location: 'Lucerne, Switzerland',
-      image: 'https://images.unsplash.com/photo-1571204829887-3b8d69f1c5ed?w=800&h=500&fit=crop',
-      description: 'Witness the magic of sunrise from above the clouds on this unforgettable paragliding journey.',
+      image: 'https://images.unsplash.com/photo-1571204829887-3b8d69f1c5ed?w=600&h=400&fit=crop',
+      description: 'Witness the magic of sunrise from above the clouds on this unforgettable paragliding journey. A truly magical experience.',
       highlights: ['Sunrise views', 'Breakfast included', 'Professional photos', 'Private experience'],
       provider: 'Earnest Spoonbill Expeditions',
       contact: '+41 78 456 7890',
@@ -106,8 +114,8 @@ const CitySearchPage = () => {
       price: 129,
       duration: '1.5 hours',
       location: 'Zermatt, Switzerland',
-      image: 'https://images.unsplash.com/photo-1522729093435-0739b9b3fe9e?w=800&h=500&fit=crop',
-      description: 'Fly alongside the iconic Matterhorn and experience the ultimate mountain adventure.',
+      image: 'https://images.unsplash.com/photo-1522729093435-0739b9b3fe9e?w=600&h=400&fit=crop',
+      description: 'Fly alongside the iconic Matterhorn and experience the ultimate mountain adventure. Perfect for photography enthusiasts.',
       highlights: ['Matterhorn views', 'Expert pilots', 'Action camera included', 'Thermal flying'],
       provider: 'Cool Mart Adventures',
       contact: '+41 78 234 5678',
@@ -126,8 +134,8 @@ const CitySearchPage = () => {
       price: 159,
       duration: '2 hours',
       location: 'Geneva, Switzerland',
-      image: 'https://images.unsplash.com/photo-1571204829887-3b8d69f1c5ed?w=800&h=500&fit=crop',
-      description: 'Perfect for beginners! Fly tandem with experienced instructors over beautiful Lake Geneva.',
+      image: 'https://images.unsplash.com/photo-1571204829887-3b8d69f1c5ed?w=600&h=400&fit=crop',
+      description: 'Perfect for beginners! Fly tandem with experienced instructors over beautiful Lake Geneva. No experience needed.',
       highlights: ['Beginner friendly', 'Lake views', 'Photos included', 'Safety briefing'],
       provider: 'Prane Adventures',
       contact: '+41 78 345 6789',
@@ -139,11 +147,19 @@ const CitySearchPage = () => {
     }
   ];
 
-  // Filter results based on search query, group, and sort
+  const [searchResults, setSearchResults] = useState(sampleResults);
+
+  const toggleWishlist = (id) => {
+    if (wishlist.includes(id)) {
+      setWishlist(wishlist.filter(item => item !== id));
+    } else {
+      setWishlist([...wishlist, id]);
+    }
+  };
+
   const getFilteredResults = () => {
     let filtered = [...searchResults];
     
-    // Search filter
     if (searchQuery) {
       filtered = filtered.filter(result => 
         result.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -153,7 +169,6 @@ const CitySearchPage = () => {
       );
     }
     
-    // Group by
     if (activeGroup === 'location') {
       filtered = [...filtered].sort((a, b) => a.location.localeCompare(b.location));
     } else if (activeGroup === 'price') {
@@ -162,7 +177,6 @@ const CitySearchPage = () => {
       filtered = [...filtered].sort((a, b) => a.duration.localeCompare(b.duration));
     }
     
-    // Sort by
     if (sortBy === 'price_low') {
       filtered = [...filtered].sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price_high') {
@@ -178,43 +192,62 @@ const CitySearchPage = () => {
 
   const filteredResults = getFilteredResults();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0B0B2B] via-[#1A1A3E] to-[#2D1B4E]">
-      
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0c1a] via-[#030518] to-[#01010f]">
       {/* Background decorative elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-4 w-96 h-96 bg-[#6C63FF] opacity-10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 -right-4 w-96 h-96 bg-[#FF6584] opacity-10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-[#6C63FF] opacity-5 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-[#6C63FF] opacity-10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-72 h-72 bg-[#FF6584] opacity-10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
-        <div className="text-center mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
           <div className="inline-block mb-4">
-            <div className="glass-effect px-4 py-2 rounded-full">
-              <span className="text-[#FF6584] font-medium">✨ Activity Search</span>
+            <div className="glass-card px-4 py-2 rounded-full">
+              <span className="text-[#FF6584] font-medium flex items-center gap-2">
+                <Mountain size={14} />
+                Activity Search
+              </span>
             </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white via-[#6C63FF] to-[#FF6584] bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold font-playfair bg-gradient-to-r from-white via-[#6C63FF] to-[#FF6584] bg-clip-text text-transparent mb-4">
             Find Your Adventure
           </h1>
-          <p className="text-white/60 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Discover amazing activities and experiences in cities around the world
           </p>
-        </div>
+        </motion.div>
 
         {/* Search Bar */}
-        <div className="glass-effect rounded-2xl p-6 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card rounded-2xl p-6 mb-8"
+        >
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
                 placeholder="Search activities, destinations, or providers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-[#6C63FF] transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-[rgba(255,255,255,0.05)] border border-[rgba(108,99,255,0.3)] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-all"
               />
             </div>
             
@@ -223,19 +256,18 @@ const CitySearchPage = () => {
                 <select
                   value={activeGroup}
                   onChange={(e) => setActiveGroup(e.target.value)}
-                  className="appearance-none px-4 py-3 pr-10 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-[#6C63FF] cursor-pointer"
-                  style={{ color: '#6C63FF' }}
+                  className="appearance-none px-4 py-3 pr-10 bg-[rgba(255,255,255,0.05)] border border-[rgba(108,99,255,0.3)] rounded-xl text-indigo-400 focus:outline-none focus:border-indigo-500 cursor-pointer"
                 >
-                  <option value="all" style={{ color: '#6C63FF' }}>Group by: All</option>
-                  <option value="location" style={{ color: '#6C63FF' }}>Location</option>
-                  <option value="price" style={{ color: '#6C63FF' }}>Price</option>
-                  <option value="duration" style={{ color: '#6C63FF' }}>Duration</option>
+                  <option value="all">Group by: All</option>
+                  <option value="location">Location</option>
+                  <option value="price">Price</option>
+                  <option value="duration">Duration</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: '#6C63FF' }} />
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-400 pointer-events-none" size={16} />
               </div>
               
-              <button className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white/90 hover:bg-white/10 transition-all group flex items-center gap-2">
-                <Filter className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+              <button className="px-4 py-3 bg-[rgba(255,255,255,0.05)] border border-[rgba(108,99,255,0.3)] rounded-xl text-gray-300 hover:bg-[rgba(255,255,255,0.1)] transition-all group flex items-center gap-2">
+                <Filter size={18} className="group-hover:rotate-12 transition-transform" />
                 Filter
               </button>
               
@@ -243,181 +275,289 @@ const CitySearchPage = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none px-4 py-3 pr-10 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-[#6C63FF] cursor-pointer"
-                  style={{ color: '#6C63FF' }}
+                  className="appearance-none px-4 py-3 pr-10 bg-[rgba(255,255,255,0.05)] border border-[rgba(108,99,255,0.3)] rounded-xl text-indigo-400 focus:outline-none focus:border-indigo-500 cursor-pointer"
                 >
-                  <option value="rating" style={{ color: '#6C63FF' }}>Sort by: Rating</option>
-                  <option value="price_low" style={{ color: '#6C63FF' }}>Price: Low to High</option>
-                  <option value="price_high" style={{ color: '#6C63FF' }}>Price: High to Low</option>
-                  <option value="popularity" style={{ color: '#6C63FF' }}>Popularity</option>
+                  <option value="rating">Sort by: Rating</option>
+                  <option value="price_low">Price: Low to High</option>
+                  <option value="price_high">Price: High to Low</option>
+                  <option value="popularity">Popularity</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: '#6C63FF' }} />
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-400 pointer-events-none" size={16} />
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-white/60 text-sm">
-            Found <span className="text-[#6C63FF] font-semibold">{filteredResults.length}</span> results for "{searchQuery}"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
+          <p className="text-gray-400 text-sm">
+            Found <span className="text-indigo-400 font-semibold">{filteredResults.length}</span> results for “
+            <span className="text-white">{searchQuery}</span>”
           </p>
-        </div>
+        </motion.div>
 
         {/* Search Results Grid */}
-        <div className="space-y-6">
-          {filteredResults.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="glass-effect rounded-2xl p-8">
-                <Search className="w-16 h-16 text-white/20 mx-auto mb-4" />
-                <p className="text-white/60 text-lg">No results found for "{searchQuery}"</p>
-                <p className="text-white/40 text-sm mt-2">Try searching with different keywords</p>
-              </div>
-            </div>
-          ) : (
-            filteredResults.map((result) => (
-              <div
-                key={result.id}
-                className="group glass-effect rounded-2xl overflow-hidden hover-glow transition-all duration-300 cursor-pointer"
-              >
-                <div className="flex flex-col md:flex-row">
-                  {/* Result Image */}
-                  <div className="md:w-80 h-48 md:h-auto overflow-hidden relative">
-                    <img
-                      src={result.image}
-                      alt={result.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-3 left-3 flex gap-2">
-                      <span className="px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg text-white text-xs flex items-center gap-1">
-                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                        {result.rating}
-                      </span>
-                      <span className="px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg text-white text-xs">
-                        {result.reviews} reviews
-                      </span>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6"
+        >
+          <AnimatePresence>
+            {filteredResults.length === 0 ? (
+              <motion.div variants={itemVariants} className="text-center py-12">
+                <div className="glass-card rounded-2xl p-12">
+                  <Search size={64} className="text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 text-lg">No results found for "{searchQuery}"</p>
+                  <p className="text-gray-500 text-sm mt-2">Try searching with different keywords</p>
+                </div>
+              </motion.div>
+            ) : (
+              filteredResults.map((result) => (
+                <motion.div
+                  key={result.id}
+                  variants={itemVariants}
+                  whileHover={{ y: -4 }}
+                  className="glass-card rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
+                  onClick={() => setSelectedResult(result)}
+                >
+                  <div className="flex flex-col md:flex-row">
+                    {/* Result Image */}
+                    <div className="md:w-80 h-52 md:h-auto overflow-hidden relative">
+                      <img
+                        src={result.image}
+                        alt={result.title}
+                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop';
+                        }}
+                      />
+                      <div className="absolute top-3 left-3 flex gap-2">
+                        <span className="px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg text-white text-xs flex items-center gap-1">
+                          <Star size={10} className="text-yellow-400 fill-yellow-400" />
+                          {result.rating}
+                        </span>
+                        <span className="px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg text-white text-xs">
+                          {result.reviews} reviews
+                        </span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleWishlist(result.id);
+                        }}
+                        className="absolute top-3 right-3 p-2 bg-black/60 backdrop-blur-sm rounded-full hover:bg-pink-500/80 transition-colors"
+                      >
+                        <Heart 
+                          size={16} 
+                          className={`transition-colors ${wishlist.includes(result.id) ? 'fill-pink-500 text-pink-500' : 'text-white'}`}
+                        />
+                      </button>
                     </div>
-                    <button className="absolute top-3 right-3 p-2 bg-black/60 backdrop-blur-sm rounded-full hover:bg-[#FF6584] transition-colors">
-                      <Heart className="w-4 h-4 text-white" />
-                    </button>
+                    
+                    {/* Result Details */}
+                    <div className="flex-1 p-6">
+                      <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
+                        <div>
+                          <h3 className="text-xl font-bold text-white hover:text-indigo-400 transition-colors">
+                            {result.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <MapPin size={14} className="text-pink-400" />
+                            <p className="text-gray-400 text-sm">{result.location}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-indigo-400">${result.price}</p>
+                          <p className="text-gray-500 text-xs">per person</p>
+                        </div>
+                      </div>
+                      
+                      <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                        {result.description}
+                      </p>
+                      
+                      {/* Features */}
+                      <div className="flex flex-wrap gap-3 mb-4">
+                        {result.features.map((feature, idx) => (
+                          <div key={idx} className="flex items-center gap-1 text-gray-500 text-xs">
+                            <CheckCircle size={12} className="text-green-500" />
+                            <span>{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Duration & Availability */}
+                      <div className="flex items-center gap-6 pt-3 border-t border-[rgba(255,255,255,0.1)]">
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <Clock size={14} className="text-indigo-400" />
+                          <span>{result.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <Users size={14} className="text-pink-400" />
+                          <span>{result.availableSpots} spots left</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <Award size={14} className="text-yellow-400" />
+                          <span>Certified</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
-                  {/* Result Details */}
-                  <div className="flex-1 p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-xl font-bold text-white group-hover:text-[#6C63FF] transition-colors">
-                          {result.title}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <MapPin className="w-4 h-4 text-[#FF6584]" />
-                          <p className="text-white/60 text-sm">{result.location}</p>
+                  {/* Provider Info Bar */}
+                  <div className="border-t border-[rgba(255,255,255,0.05)] p-4 bg-[rgba(255,255,255,0.02)]">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <span className="text-gray-500 text-sm">Provided by:</span>
+                        <span className="text-white text-sm font-medium">{result.provider}</span>
+                        <div className="flex items-center gap-2 text-gray-500 text-xs">
+                          <Phone size={12} />
+                          <span>{result.contact}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-500 text-xs">
+                          <Mail size={12} />
+                          <span>{result.email}</span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-[#6C63FF]">${result.price}</p>
-                        <p className="text-white/40 text-xs">per person</p>
+                      <button className="px-4 py-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-lg text-white text-sm font-medium hover:shadow-lg transition-all">
+                        Book Now
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+
+      {/* Activity Detail Modal */}
+      <AnimatePresence>
+        {selectedResult && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setSelectedResult(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="relative">
+                <img
+                  src={selectedResult.image}
+                  alt={selectedResult.title}
+                  className="w-full h-64 object-cover rounded-t-2xl"
+                />
+                <button
+                  onClick={() => setSelectedResult(null)}
+                  className="absolute top-4 right-4 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <X size={20} className="text-white" />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">{selectedResult.title}</h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <MapPin size={16} className="text-pink-400" />
+                      <p className="text-gray-400">{selectedResult.location}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-indigo-400">${selectedResult.price}</p>
+                    <p className="text-gray-500 text-sm">per person</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center gap-1">
+                    <Star size={16} className="text-yellow-400 fill-yellow-400" />
+                    <span className="text-white font-medium">{selectedResult.rating}</span>
+                    <span className="text-gray-500 text-sm">({selectedResult.reviews} reviews)</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock size={14} className="text-indigo-400" />
+                    <span className="text-gray-400 text-sm">{selectedResult.duration}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Users size={14} className="text-pink-400" />
+                    <span className="text-gray-400 text-sm">{selectedResult.availableSpots} spots left</span>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-2">Description</h3>
+                  <p className="text-gray-400 leading-relaxed">{selectedResult.description}</p>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-3">Highlights</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {selectedResult.highlights.map((highlight, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-gray-400 text-sm">
+                        <CheckCircle size={14} className="text-green-500" />
+                        {highlight}
                       </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-3">Contact Information</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 text-gray-400 text-sm">
+                      <Phone size={14} className="text-indigo-400" />
+                      <span>{selectedResult.contact}</span>
                     </div>
-                    
-                    {/* Provider */}
-                    <div className="mb-3">
-                      <p className="text-white/50 text-sm">Provided by <span className="text-white/80 font-medium">{result.provider}</span></p>
+                    <div className="flex items-center gap-3 text-gray-400 text-sm">
+                      <Mail size={14} className="text-indigo-400" />
+                      <span>{selectedResult.email}</span>
                     </div>
-                    
-                    {/* Description */}
-                    <p className="text-white/70 text-sm mb-4 line-clamp-2">
-                      {result.description}
-                    </p>
-                    
-                    {/* Highlights */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {result.highlights.slice(0, 3).map((highlight, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-white/5 rounded-full text-xs text-white/70">
-                          {highlight}
-                        </span>
-                      ))}
-                      {result.highlights.length > 3 && (
-                        <span className="px-2 py-1 bg-white/5 rounded-full text-xs text-white/50">
-                          +{result.highlights.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Features */}
-                    <div className="flex flex-wrap gap-4 mb-4">
-                      {result.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-1 text-white/50 text-xs">
-                          <Award className="w-3 h-3 text-[#6C63FF]" />
-                          <span>{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {/* Duration & Availability */}
-                    <div className="flex items-center gap-4 pt-3 border-t border-white/10">
-                      <div className="flex items-center gap-2 text-white/60 text-sm">
-                        <Clock className="w-4 h-4 text-[#6C63FF]" />
-                        <span>{result.duration}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-white/60 text-sm">
-                        <Users className="w-4 h-4 text-[#FF6584]" />
-                        <span>{result.availableSpots} spots left</span>
-                      </div>
+                    <div className="flex items-center gap-3 text-gray-400 text-sm">
+                      <Globe size={14} className="text-indigo-400" />
+                      <span>{selectedResult.website}</span>
                     </div>
                   </div>
                 </div>
                 
-                {/* Expanded Details Section (visible on hover/click) */}
-                <div className="border-t border-white/10 p-4 bg-white/5 hidden md:block">
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <button className="flex items-center gap-2 text-white/60 hover:text-[#6C63FF] transition-colors text-sm">
-                        <Phone className="w-4 h-4" />
-                        {result.contact}
-                      </button>
-                      <button className="flex items-center gap-2 text-white/60 hover:text-[#6C63FF] transition-colors text-sm">
-                        <Mail className="w-4 h-4" />
-                        {result.email}
-                      </button>
-                      <button className="flex items-center gap-2 text-white/60 hover:text-[#6C63FF] transition-colors text-sm">
-                        <Globe className="w-4 h-4" />
-                        {result.website}
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button className="p-2 rounded-lg bg-white/5 hover:bg-[#6C63FF]/20 transition-colors">
-                       <Globe className="w-4 h-4 text-white/60" />
-                      </button>
-                      <button className="p-2 rounded-lg bg-white/5 hover:bg-[#6C63FF]/20 transition-colors">
-                        <Globe className="w-4 h-4 text-white/60" />
-                      </button>
-                      <button className="p-2 rounded-lg bg-white/5 hover:bg-[#6C63FF]/20 transition-colors">
-                        <MessageCircle className="w-4 h-4 text-white/60" />
-                      </button>
-                      <button className="p-2 rounded-lg bg-white/5 hover:bg-[#6C63FF]/20 transition-colors">
-                        <Share2 className="w-4 h-4 text-white/60" />
-                      </button>
-                    </div>
-                  </div>
+                <div className="flex gap-3">
+                  <button className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-white font-semibold hover:shadow-lg transition-all">
+                    Book Now
+                  </button>
+                  <button className="px-6 py-3 bg-[rgba(255,255,255,0.05)] border border-[rgba(108,99,255,0.3)] rounded-xl text-gray-300 hover:bg-[rgba(255,255,255,0.1)] transition-all">
+                    Save to Wishlist
+                  </button>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <style jsx>{`
-        .glass-effect {
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+        .glass-card {
+          background: rgba(15, 25, 45, 0.5);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(108, 99, 255, 0.3);
+          transition: all 0.3s ease;
         }
         
-        .hover-glow:hover {
-          box-shadow: 0 0 20px rgba(108, 99, 255, 0.3);
-          border-color: rgba(108, 99, 255, 0.3);
-          transform: translateY(-2px);
+        .glass-card:hover {
+          border-color: rgba(108, 99, 255, 0.6);
         }
         
         .line-clamp-2 {
@@ -425,6 +565,19 @@ const CitySearchPage = () => {
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+        
+        @keyframes pulse {
+          0%, 100% { opacity: 0.1; }
+          50% { opacity: 0.2; }
+        }
+        
+        .animate-pulse {
+          animation: pulse 4s ease-in-out infinite;
+        }
+        
+        .delay-1000 {
+          animation-delay: 1s;
         }
       `}</style>
     </div>
