@@ -16,7 +16,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Plane
+  Plane,
+  Users 
 } from 'lucide-react'
 
 const menuItems = [
@@ -27,6 +28,8 @@ const menuItems = [
   { path: '/activities', icon: CalendarDays, label: 'Activities' },
   { path: '/budget', icon: PiggyBank, label: 'Budget' },
   { path: '/notes', icon: NotebookPen, label: 'Notes' },
+  { path: '/city-search', icon: MapPin, label: 'City Search' },
+  { path: '/community', icon: Users, label: 'Community' }, 
   { path: '/checklist', icon: CheckSquare, label: 'Checklist' },
   { path: '/shared', icon: Share2, label: 'Shared Trips' },
   { path: '/profile', icon: User, label: 'Profile' },
