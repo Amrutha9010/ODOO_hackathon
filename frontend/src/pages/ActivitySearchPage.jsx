@@ -339,38 +339,6 @@ const ActivitiesPlanner = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0c1a] via-[#030518] to-[#01010f]">
-      {/* Top Navbar */}
-      <nav className="glass-navbar border-b border-[rgba(108,99,255,0.2)] px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="text-2xl font-bold bg-gradient-to-r from-indigo-300 to-violet-400 bg-clip-text text-transparent">
-            Traveloop
-          </div>
-
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center hover:scale-105 transition-transform"
-            >
-              <span className="text-white text-sm font-semibold">JD</span>
-            </button>
-            
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-48 glass-card rounded-xl py-2 z-50">
-                <button className="w-full px-4 py-2 text-left text-gray-300 hover:bg-[rgba(255,255,255,0.05)] transition-colors flex items-center gap-2">
-                  <User size={16} /> Profile
-                </button>
-                <button className="w-full px-4 py-2 text-left text-gray-300 hover:bg-[rgba(255,255,255,0.05)] transition-colors flex items-center gap-2">
-                  <Settings size={16} /> Settings
-                </button>
-                <button className="w-full px-4 py-2 text-left text-red-400 hover:bg-[rgba(255,255,255,0.05)] transition-colors flex items-center gap-2">
-                  <LogOut size={16} /> Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search & Filter Section */}
         <motion.div
