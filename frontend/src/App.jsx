@@ -23,6 +23,8 @@ import BudgetPage from './pages/BudgetPage'
 import MyTripsPage from './pages/MyTripsPage'
 import CitySearchPage from './pages/CitySearchPage'
 import AdminPage from './pages/AdminPage'
+import SettingsPage from './pages/Settings'
+import ActivitiesPlanner from './pages/ActivitySearchPage'
 // Landing Page Component
 const LandingPage = () => {
   return (
@@ -61,13 +63,8 @@ function App() {
           <Route path="/budget" element={<BudgetPage />} />
           <Route path="/my-trips" element={<MyTripsPage />} />
           <Route path="/city-search" element={<CitySearchPage />} />
-          
-
-          {/* 
-          <Route path="/activities" element={<ActivitySearchPage />} />
-          <Route path="/budget" element={<BudgetPage />} />
-          <Route path="/shared" element={<SharedItineraryPage />} />
-          <Route path="/settings" element={<SettingsPage />} /> */}
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/activities" element={<ActivitiesPlanner />} />
         </Route>
           {/* Add other routes as needed */}
       </Routes>

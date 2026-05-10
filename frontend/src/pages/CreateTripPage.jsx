@@ -113,7 +113,7 @@ const CreateTripPage = () => {
       {/* Main Content */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
-        <motion.button
+        {/* <motion.button
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={handleBack}
@@ -121,7 +121,7 @@ const CreateTripPage = () => {
         >
           <ArrowLeft size={18} />
           Back to Dashboard
-        </motion.button>
+        </motion.button> */}
 
         {/* Title Section */}
         <motion.div

@@ -31,7 +31,6 @@ const menuItems = [
   { path: '/city-search', icon: MapPin, label: 'City Search' },
   { path: '/community', icon: Users, label: 'Community' }, 
   { path: '/checklist', icon: CheckSquare, label: 'Checklist' },
-  { path: '/shared', icon: Share2, label: 'Shared Trips' },
   { path: '/profile', icon: User, label: 'Profile' },
   { path: '/settings', icon: Settings, label: 'Settings' },
 ]
